@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp QR Pairing and Messaging</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Optional: You can add your CSS styles here -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp QR Pairing and Messaging</h1>
+        
+        <h2>Pair with WhatsApp</h2>
+        <form id="pairForm">
+            <label for="sessionName">Session Name:</label>
+            <input type="text" id="sessionName" required>
+            
+            <label for="phoneNumber">Phone Number (with country code):</label>
+            <input type="tel" id="phoneNumber" placeholder="+1234567890" required>
+            
+            <button type="submit">Generate QR Code</button>
+        </form>
+
+        <div id="qrCodeContainer" style="display: none;">
+            <h3>Scan the QR Code</h3>
+            <img id="qrCode" alt="QR Code" />
+        </div>
+
+        <h2>Send Messages</h2>
+        <form id="sendForm" enctype="multipart/form-data">
+            <label for="targetNumber">Target Number (with country code):</label>
+            <input type="tel" id="targetNumber" placeholder="+1234567890" required>
+            
+            <label for="file">Upload File with Messages:</label>
+            <input type="file" id="file" name="file" accept=".txt" required>
+            
+            <button type="submit">Send Messages</button>
+        </form>
+
+        <div id="messageStatus"></div>
+    </div>
+
+    <script>
+        // Handle QR code generation
+        $('#pairForm').on('submit', function(event) {
+            event.preventDefault();
+            const sessionName = $('#sessionName').val();
+            const phoneNumber = $('#phoneNumber').val();
+
+            $.post('/pair', { sessionName, phoneNumber }, function(data) {
+                if (data.qrCode) {
+                    $('#qrCode').attr('src', data.qrCode);
+                    $('#qrCodeContainer').show();
+                }
+                if (data.message) {
+                    alert(data.message);
+                }
+            }).fail(function(xhr) {
+                alert('Error: ' + xhr.responseJSON.message);
+            });
+        });
+
+        // Handle message sending
+        $('#sendForm').on('submit', function(event) {
+            event.preventDefault();
+            const targetNumber = $('#targetNumber').val();
+            const fileInput = $('#file')[0];
+
+            const formData = new FormData();
+            formData.append('targetNumber', targetNumber);
+            formData.append('file', fileInput.files[0]);
+
+            $.ajax({
+                url: '/send',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    $('#messageStatus').text(data.message);
+                },
+                error: function(xhr) {
+                    $('#messageStatus').text('Error: ' + xhr.responseJSON.message);
+                }
+            });
+        });
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], input[type="tel"], input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #messageStatus {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</body>
+</html>
