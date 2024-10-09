@@ -1,0 +1,20 @@
+
+{
+  "name": "Wpp",
+  "version": "1.0.0",
+  "description": "your-project-description",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.3",
+    "@whiskeysockets/baileys": "^5.1.0",
+    "chalk": "^4.1.2",
+    "fs": "0.0.1-security", // Note: fs is a core module; this is just a placeholder
+    "multer": "^1.4.4",
+    "pino": "^8.4.0",
+    "qrcode": "^1.4.4"
+  }
+}
